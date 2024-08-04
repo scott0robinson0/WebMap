@@ -1,5 +1,4 @@
 from dash import Dash, dcc, html, Input, Output, ctx
-
 import plotly.express as px
 import pandas as pd
 import load
@@ -10,7 +9,8 @@ current_metric = 'None'
 
 app.layout = html.Div([
     html.H4('Country information'),
-    html.Button('Reset Data', id='reset', n_clicks=0),
+    # Uncomment if using mongodb
+    # html.Button('Reset Data', id='reset', n_clicks=0),
     html.P("Select a metric:"),
     dcc.Dropdown(
         id='metric',
@@ -25,9 +25,13 @@ app.layout = html.Div([
 @app.callback(
     Output('map', 'figure'), 
     Input('metric', 'value'),
-    Input('reset', 'n_clicks')
+    # Uncomment if using mongodb
+    # Input('reset', 'n_clicks')
 )
-def display_choropleth(metric, n_clicks):
+def display_choropleth(metric
+                    # Uncomment if using mongodb
+                    #    , n_clicks
+                    ):
     global current_metric
     triggered_id = ctx.triggered_id
 
@@ -36,7 +40,11 @@ def display_choropleth(metric, n_clicks):
         metric = current_metric
     else:
         current_metric = metric
-    countries = load.download()
+    
+    countries = load.load_all()
+
+    # Uncomment if using mongodb
+    # countries = load.download()
 
     df = pd.DataFrame(countries)
     

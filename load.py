@@ -3,13 +3,17 @@ import plotly.express as px
 import pymongo
 from pymongo import ReplaceOne
 import http.client
+import socket
 
 # Get data from the restcountries API
 def request_restcountries():
     conn = http.client.HTTPSConnection('restcountries.com')
 
-    conn.request('GET', '/v3.1/all')
-
+    try:
+        conn.request('GET', '/v3.1/all')
+    except socket.timeout as st:
+        return 0
+    
     res = conn.getresponse()
     json_bytes = res.read()
     json_string = json_bytes.decode('utf-8')
@@ -55,6 +59,8 @@ def load_all():
     rest_countries = request_restcountries()
     df_gapminder = load_gapminder()
 
+
+
     return combineData(rest_countries, df_gapminder)
 
 # Upload country data to MongoDB
@@ -75,6 +81,7 @@ def upload():
 
     client.close()
 
+# Download country data from MongoDB
 def download():
     client = pymongo.MongoClient('mongodb://localhost:27017/')
     db = client['CountryInfoDatabase']
@@ -87,4 +94,11 @@ def download():
 
     return countries
 
-upload()
+# Uncomment if using mongodb
+# upload()
+
+data = request_restcountries()
+
+import json
+with open('test.json', 'w') as file:
+    json.dump(data, file)
